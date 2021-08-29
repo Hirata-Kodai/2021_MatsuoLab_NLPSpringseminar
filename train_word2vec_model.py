@@ -6,6 +6,7 @@ import pickle
 import torch
 import torch.optim as optim
 import time
+import numpy as np
 
 
 def load_data(path):

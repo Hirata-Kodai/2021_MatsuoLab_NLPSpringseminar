@@ -54,6 +54,7 @@ class CBOW(nn.Module):
         loss = F.nll_loss(log_prob_X, batch_Y)
         return loss
 
+
 class Skipgram(nn.Module):
     def __init__(self, vocab_size, embedding_size):
         '''
@@ -80,3 +81,29 @@ class Skipgram(nn.Module):
             log_prob_X = log_prob_X * (batch_Y != 0).float()  # padding(=0) 部分にマスク
             loss = log_prob_X.sum(1).mean().neg()
             return loss
+
+
+class SGNS(nn.Module):
+    def __init__(self, vocab_size, embedding_size):
+        '''
+        :pram vocav_size : int, 語彙の総数
+        :pram embedding_size : int, 単語埋め込みベクトルの次元
+        '''
+        super(Skipgram, self).__init__()
+        self.vocab_size = vocab_size
+        self.embedding_size = embedding_size
+
+        self.embedding = nn.Embedding(self.vocab_size, self.embedding_size)
+        self.linear = nn.Linear(self.embedding_size, self.vocab_size)
+
+    def forward(self, batch_X, batch_Y, batch_N):
+        '''
+        :pram batch_X : torch.Tensor(dtype=torch.long), (batch_size, )
+        :pram batch_Y : torch.Tensor(dtype=torch.long), (batch_size, window*2)
+        :pram batch_N : torch.Tensor(dtype=torch.long), (batch_size, n_negative)
+        :return loss : torch.Tensor(dtype=forch.float), Skipgramのloss
+        '''
+        emb_X = self.embedding(batch_X)  # (batch_size, embedding_size)
+        emb_Y = self.embedding(batch_Y)  # (batch_size, window*2, embedding_size)
+        emb_N = self.embedding(batch_N)  # (batch_size, n_negative, embedding_size)
+        
